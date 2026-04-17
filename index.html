@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinilink — Bridge the meaning gap</title>
+  <meta name="description" content="A daily word-connection challenge. Bridge the semantic gap between two words by chaining synonyms and related words." />
+
+  <!-- Inline favicon (chain link emoji) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">🔗</span>
+        <div>
+          <h1>Infinilink</h1>
+          <p class="tagline">Bridge the meaning gap</p>
+        </div>
+      </div>
+
+      <div class="mode-tabs">
+        <button id="dailyTab"    class="tab-btn active">Daily</button>
+        <button id="infiniteTab" class="tab-btn">∞ Infinite</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- Word endpoints -->
+    <div class="words-card card">
+      <div class="word-endpoint">
+        <span class="word-role start-role">Start</span>
+        <span id="startWordDisplay" class="word-value start-value">—</span>
+      </div>
+
+      <div class="words-mid">
+        <div class="dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <span class="arrow">→</span>
+        <div class="dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <div class="word-endpoint">
+        <span class="word-role target-role">Target</span>
+        <span id="endWordDisplay" class="word-value target-value">—</span>
+      </div>
+    </div>
+
+    <!-- Chain -->
+    <div class="chain-card card">
+      <div class="chain-header">
+        <span class="section-label">Your Chain</span>
+        <span id="stepsCounter" class="steps-badge">0 steps</span>
+      </div>
+      <div id="chainDisplay" class="chain-display">
+        <p class="chain-empty">Your word chain will appear here.</p>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div id="inputSection" class="input-card card">
+      <div class="input-row">
+        <input
+          type="text"
+          id="wordInput"
+          placeholder="Enter a connecting word…"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+        <button id="submitBtn" class="btn btn-primary">Submit</button>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <button id="hintBtn" class="btn-link">💡 Get a hint</button>
+    </div>
+
+    <!-- Win screen -->
+    <div id="winSection" class="win-card card hidden">
+      <div id="winTitle"    class="win-title">🎉 Connected!</div>
+      <p   id="winSubtitle" class="win-subtitle">You bridged the gap!</p>
+
+      <div class="win-stats">
+        <div class="win-stat">
+          <span id="winSteps" class="stat-num">0</span>
+          <span class="stat-label">Steps</span>
+        </div>
+        <div class="win-stat">
+          <span id="winWords" class="stat-num">0</span>
+          <span class="stat-label">Words</span>
+        </div>
+        <div class="win-stat">
+          <span id="winStreak" class="stat-num">0</span>
+          <span class="stat-label">Streak 🔥</span>
+        </div>
+      </div>
+
+      <div class="win-actions">
+        <button id="shareBtn"        class="btn btn-primary">📤 Share</button>
+        <button id="playInfiniteBtn" class="btn btn-secondary hidden">∞ Play Infinite</button>
+        <button id="newGameBtn"      class="btn btn-secondary hidden">New Puzzle</button>
+      </div>
+    </div>
+
+    <!-- How to play -->
+    <details class="how-to-play card" open>
+      <summary class="section-label">How to Play</summary>
+      <ul class="instructions">
+        <li>You're given a <strong>start word</strong> and a <strong>target word</strong>.</li>
+        <li>Type words one at a time to build a chain that bridges their meanings.</li>
+        <li>Each word must be a <strong>synonym</strong>, <strong>similar in meaning</strong>, or <strong>strongly associated</strong> with the previous word.</li>
+        <li>Submit the exact target word to win — <strong>fewer steps is better</strong>!</li>
+        <li>A fresh <strong>Daily Challenge</strong> unlocks every day. Complete it to play <strong>Infinite</strong> mode.</li>
+      </ul>
+    </details>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="words.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
