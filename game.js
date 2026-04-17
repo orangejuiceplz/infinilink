@@ -4,8 +4,8 @@
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 const DATAMUSE = "https://api.datamuse.com/words";
-// Update this URL if the repository is renamed or moved.
-const SITE_URL = "https://orangejuiceplz.github.io/infinilink";
+const SITE_BASE_PATH = location.pathname.replace(/\/[^/]*$/, "") || "/";
+const SITE_URL = `${location.origin}${SITE_BASE_PATH === "/" ? "" : SITE_BASE_PATH}`;
 const MAX_CHAIN = 50;
 
 // ── API cache (simple Map so we never hit the same URL twice per session) ─────
