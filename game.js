@@ -4,6 +4,7 @@
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 const DATAMUSE = "https://api.datamuse.com/words";
+// Update this URL if the repository is renamed or moved.
 const SITE_URL = "https://orangejuiceplz.github.io/infinilink";
 const MAX_CHAIN = 50;
 
@@ -59,7 +60,7 @@ async function validateConnection(prevWord, newWord) {
   // Word must exist
   const existsEntry = spell.find((r) => r.word.toLowerCase() === w2);
   if (!existsEntry) {
-    return { valid: false, reason: `"${newWord}" doesn't look like a recognised English word.` };
+    return { valid: false, reason: `"${newWord}" doesn't look like a recognized English word.` };
   }
 
   const definition = extractDef(existsEntry);
@@ -161,9 +162,12 @@ function recordWin(mode) {
   if (mode === "daily") {
     const today = getDailyDate();
     if (stats.lastDailyDate) {
-      const prev = new Date(stats.lastDailyDate);
-      const now  = new Date(today);
-      const diff = Math.round((now - prev) / 86_400_000);
+      // Parse both dates as UTC midnight to avoid DST-induced miscounts
+      const [py, pm, pd] = stats.lastDailyDate.split("-").map(Number);
+      const [ty, tm, td] = today.split("-").map(Number);
+      const prevMs = Date.UTC(py, pm - 1, pd);
+      const todayMs = Date.UTC(ty, tm - 1, td);
+      const diff = Math.round((todayMs - prevMs) / 86_400_000);
       stats.dailyStreak = diff === 1 ? (stats.dailyStreak || 0) + 1 : 1;
     } else {
       stats.dailyStreak = 1;

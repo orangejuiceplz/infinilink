@@ -90,18 +90,15 @@ function getDailyDate() {
 
 /** Deterministic daily index (1-based, starts from 2024-01-01). */
 function getDailyNumber() {
+  const now   = new Date();
   const epoch = Date.UTC(2024, 0, 1);
-  const today = Date.UTC(
-    new Date().getUTCFullYear(),
-    new Date().getUTCMonth(),
-    new Date().getUTCDate()
-  );
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
   return Math.floor((today - epoch) / 86_400_000) + 1;
 }
 
 /** Word pair for today. */
 function getDailyPair() {
-  const idx = ((getDailyNumber() - 1) % WORD_PAIRS.length + WORD_PAIRS.length) % WORD_PAIRS.length;
+  const idx = (getDailyNumber() - 1) % WORD_PAIRS.length;
   return WORD_PAIRS[idx];
 }
 
