@@ -152,7 +152,11 @@ function loadStats() {
 }
 
 function saveStats(s) {
-  localStorage.setItem(STATS_KEY, JSON.stringify(s));
+  try {
+    localStorage.setItem(STATS_KEY, JSON.stringify(s));
+  } catch (err) {
+    console.warn("[Infinilink] Failed to save stats:", err);
+  }
 }
 
 function recordWin(mode) {
