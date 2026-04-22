@@ -85,24 +85,29 @@ def _load_dictionary() -> set[str]:
         return _dictionary
 
     _dictionary = set()
+    bundle = pathlib.Path(__file__).parent / "dictionary.txt"
 
-    dict_paths = [
-        pathlib.Path("/usr/share/dict/words"),
-        pathlib.Path("/usr/share/dict/american-english"),
-    ]
-    for p in dict_paths:
-        if p.exists():
-            _dictionary = {
-                w.strip().lower()
-                for w in p.read_text().splitlines()
-                if w.strip().isalpha() and len(w.strip()) >= 3
-            }
-            break
+    if bundle.exists():
+        _dictionary = {
+            w.strip().lower()
+            for w in bundle.read_text().splitlines()
+            if w.strip().isalpha() and len(w.strip()) >= 3
+        }
+    else:
+        for p in [pathlib.Path("/usr/share/dict/words"), pathlib.Path("/usr/share/dict/american-english")]:
+            if p.exists():
+                _dictionary = {
+                    w.strip().lower()
+                    for w in p.read_text().splitlines()
+                    if w.strip().isalpha() and len(w.strip()) >= 3
+                }
+                break
 
     if not _dictionary:
         from words import WORD_LIST
         _dictionary = set(WORD_LIST)
 
+    print(f"Dictionary loaded: {len(_dictionary)} words")
     return _dictionary
 
 
