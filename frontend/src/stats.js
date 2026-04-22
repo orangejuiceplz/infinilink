@@ -56,32 +56,54 @@ export function recordLoss(mode) {
 export function renderStats(mode) {
   const s = getStats(mode);
   const grid = document.getElementById('stats-grid');
-  grid.innerHTML = `
-    <div class="stats-card">
-      <span class="stats-card-value">${s.played}</span>
-      <span class="stats-card-label">Played</span>
-    </div>
-    <div class="stats-card">
-      <span class="stats-card-value">${s.played ? Math.round((s.won / s.played) * 100) : 0}%</span>
-      <span class="stats-card-label">Win Rate</span>
-    </div>
-    <div class="stats-card">
-      <span class="stats-card-value">${s.currentStreak}</span>
-      <span class="stats-card-label">Streak</span>
-    </div>
-    <div class="stats-card">
-      <span class="stats-card-value">${s.maxStreak}</span>
-      <span class="stats-card-label">Max Streak</span>
-    </div>
-    <div class="stats-card">
-      <span class="stats-card-value">${s.bestTime !== null ? formatTime(s.bestTime) : '—'}</span>
-      <span class="stats-card-label">Best Time</span>
-    </div>
-    <div class="stats-card">
-      <span class="stats-card-value">${s.fewestLinks !== null ? s.fewestLinks : '—'}</span>
-      <span class="stats-card-label">Fewest Links</span>
-    </div>
-  `;
+
+  if (mode === 'infinite') {
+    grid.innerHTML = `
+      <div class="stats-card">
+        <span class="stats-card-value">${s.played}</span>
+        <span class="stats-card-label">Games</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.bestTime !== null ? formatTime(s.bestTime) : '—'}</span>
+        <span class="stats-card-label">Best Time</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.fewestLinks !== null ? s.fewestLinks : '—'}</span>
+        <span class="stats-card-label">Fewest Links</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.won}</span>
+        <span class="stats-card-label">Completed</span>
+      </div>
+    `;
+  } else {
+    grid.innerHTML = `
+      <div class="stats-card">
+        <span class="stats-card-value">${s.played}</span>
+        <span class="stats-card-label">Played</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.played ? Math.round((s.won / s.played) * 100) : 0}%</span>
+        <span class="stats-card-label">Win Rate</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.currentStreak}</span>
+        <span class="stats-card-label">Streak</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.maxStreak}</span>
+        <span class="stats-card-label">Max Streak</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.bestTime !== null ? formatTime(s.bestTime) : '—'}</span>
+        <span class="stats-card-label">Best Time</span>
+      </div>
+      <div class="stats-card">
+        <span class="stats-card-value">${s.fewestLinks !== null ? s.fewestLinks : '—'}</span>
+        <span class="stats-card-label">Fewest Links</span>
+      </div>
+    `;
+  }
 }
 
 function formatTime(s) {

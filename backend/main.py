@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from datetime import date
 import pathlib
 
-from embeddings import get_similarity, get_batch_similarity, CONNECTION_THRESHOLD
-from words import get_daily_pair, get_random_pair
+from embeddings import get_similarity, get_batch_similarity, CONNECTION_THRESHOLD, find_shortest_path
+from words import get_daily_pair, get_random_pair, WORD_LIST
 
 app = FastAPI(title="unlinxicon API")
 
@@ -38,11 +38,20 @@ def daily_pair(date_str: str | None = None):
     start, target = get_daily_pair(d)
     epoch = date(2025, 1, 1)
     game_number = (d - epoch).days
+
+    optimal = find_shortest_path(start, target, WORD_LIST)
+    if optimal is None:
+        word_limit = 25
+    else:
+        word_limit = max(10, optimal + 5)
+
     return {
         "start": start,
         "target": target,
         "game_number": game_number,
         "date": d.isoformat(),
+        "optimal_path": optimal,
+        "word_limit": word_limit,
     }
 
 
@@ -124,3 +133,16 @@ def validate_word(word: str):
         return {"valid": False, "word": word, "reason": "Not a recognized word"}
 
     return {"valid": True, "word": word}
+
+
+static_dir = pathlib.Path(__file__).parent / "static"
+if static_dir.exists():
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        file = static_dir / path
+        if file.exists() and file.is_file():
+            return FileResponse(file)
+        return FileResponse(static_dir / "index.html")

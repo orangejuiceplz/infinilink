@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-let svg, simulation;
+let svg, simulation, zoomGroup, zoomBehavior;
 let nodes = [];
 let links = [];
 let nodeGroup, linkGroup, labelGroup, edgeLabelGroup;
@@ -15,24 +15,33 @@ export function initGraph(containerId) {
   height = rect.height;
 
   svg.attr('viewBox', `0 0 ${width} ${height}`);
-
   svg.selectAll('*').remove();
 
-  const defs = svg.append('defs');
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.2, 3])
+    .on('zoom', (event) => {
+      zoomGroup.attr('transform', event.transform);
+    });
 
-  linkGroup = svg.append('g').attr('class', 'links');
-  edgeLabelGroup = svg.append('g').attr('class', 'edge-labels');
-  nodeGroup = svg.append('g').attr('class', 'nodes');
-  labelGroup = svg.append('g').attr('class', 'labels');
+  svg.call(zoomBehavior);
+
+  zoomGroup = svg.append('g').attr('class', 'zoom-layer');
+
+  linkGroup = zoomGroup.append('g').attr('class', 'links');
+  edgeLabelGroup = zoomGroup.append('g').attr('class', 'edge-labels');
+  nodeGroup = zoomGroup.append('g').attr('class', 'nodes');
+  labelGroup = zoomGroup.append('g').attr('class', 'labels');
 
   simulation = d3.forceSimulation()
-    .force('charge', d3.forceManyBody().strength(-300))
+    .force('charge', d3.forceManyBody().strength(-200))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collision', d3.forceCollide().radius(45))
+    .force('collision', d3.forceCollide().radius(40))
     .force('link', d3.forceLink().id(d => d.id).distance(d => {
       const sim = d.similarity || 40;
-      return Math.max(80, 250 - sim * 2);
+      return Math.max(60, 180 - sim * 1.5);
     }))
+    .force('x', d3.forceX(width / 2).strength(0.05))
+    .force('y', d3.forceY(height / 2).strength(0.05))
     .on('tick', ticked);
 
   simulation.alpha(0).stop();
@@ -43,16 +52,21 @@ export function initGraph(containerId) {
     height = r.height;
     svg.attr('viewBox', `0 0 ${width} ${height}`);
     simulation.force('center', d3.forceCenter(width / 2, height / 2));
+    simulation.force('x', d3.forceX(width / 2).strength(0.05));
+    simulation.force('y', d3.forceY(height / 2).strength(0.05));
     simulation.alpha(0.3).restart();
   });
 }
 
 export function setInitialNodes(startWord, targetWord) {
   nodes = [
-    { id: startWord, type: 'start', x: width * 0.3, y: height / 2 },
-    { id: targetWord, type: 'target', x: width * 0.7, y: height / 2 },
+    { id: startWord, type: 'start', x: width * 0.35, y: height / 2 },
+    { id: targetWord, type: 'target', x: width * 0.65, y: height / 2 },
   ];
   links = [];
+
+  svg.call(zoomBehavior.transform, d3.zoomIdentity);
+
   render();
   simulation.nodes(nodes);
   simulation.force('link').links(links);
@@ -65,8 +79,8 @@ export function addNode(word, newConnections) {
   nodes.push({
     id: word,
     type: 'user',
-    x: width / 2 + (Math.random() - 0.5) * 100,
-    y: height / 2 + (Math.random() - 0.5) * 100,
+    x: width / 2 + (Math.random() - 0.5) * 80,
+    y: height / 2 + (Math.random() - 0.5) * 80,
   });
 
   for (const conn of newConnections) {
@@ -80,7 +94,9 @@ export function addNode(word, newConnections) {
   render();
   simulation.nodes(nodes);
   simulation.force('link').links(links);
-  simulation.alpha(0.6).restart();
+  simulation.alpha(0.5).restart();
+
+  fitToView();
 }
 
 export function highlightWinPath(path) {
@@ -103,8 +119,35 @@ export function highlightWinPath(path) {
     .classed('win-node', true);
 }
 
+function fitToView() {
+  if (nodes.length < 3) return;
+
+  setTimeout(() => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const n of nodes) {
+      if (n.x < minX) minX = n.x;
+      if (n.x > maxX) maxX = n.x;
+      if (n.y < minY) minY = n.y;
+      if (n.y > maxY) maxY = n.y;
+    }
+
+    const padding = 80;
+    const bw = maxX - minX + padding * 2;
+    const bh = maxY - minY + padding * 2;
+    const scale = Math.min(width / bw, height / bh, 1.5);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const transform = d3.zoomIdentity
+      .translate(width / 2, height / 2)
+      .scale(scale)
+      .translate(-cx, -cy);
+
+    svg.transition().duration(500).call(zoomBehavior.transform, transform);
+  }, 600);
+}
+
 function render() {
-  // Links
   const linkSel = linkGroup.selectAll('.edge-line')
     .data(links, d => {
       const sId = typeof d.source === 'object' ? d.source.id : d.source;
@@ -123,7 +166,6 @@ function render() {
     .duration(400)
     .style('opacity', 1);
 
-  // Edge labels
   const edgeLabelSel = edgeLabelGroup.selectAll('.edge-label')
     .data(links, d => {
       const sId = typeof d.source === 'object' ? d.source.id : d.source;
@@ -142,7 +184,6 @@ function render() {
     .duration(400)
     .style('opacity', 1);
 
-  // Nodes
   const nodeSel = nodeGroup.selectAll('.node-circle')
     .data(nodes, d => d.id);
 
@@ -158,7 +199,6 @@ function render() {
     .duration(300)
     .style('opacity', 1);
 
-  // Labels
   const labelSel = labelGroup.selectAll('.node-label')
     .data(nodes, d => d.id);
 
@@ -186,8 +226,8 @@ function ticked() {
     .attr('y', d => (d.source.y + d.target.y) / 2 - 6);
 
   nodeGroup.selectAll('.node-circle')
-    .attr('cx', d => d.x = Math.max(25, Math.min(width - 25, d.x)))
-    .attr('cy', d => d.y = Math.max(25, Math.min(height - 25, d.y)));
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y);
 
   labelGroup.selectAll('.node-label')
     .attr('x', d => d.x)
@@ -216,5 +256,5 @@ export function resetGraph() {
   nodes = [];
   links = [];
   if (simulation) simulation.stop();
-  if (svg) svg.selectAll('g *').remove();
+  if (zoomGroup) zoomGroup.selectAll('g *').remove();
 }
