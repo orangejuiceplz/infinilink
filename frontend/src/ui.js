@@ -124,8 +124,11 @@ export function hideTimeUpModal() {
 }
 
 export function showScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'fade-in');
+  });
+  const target = document.getElementById(screenId);
+  target.classList.add('active', 'fade-in');
 }
 
 export function setHeaderMode(text) {

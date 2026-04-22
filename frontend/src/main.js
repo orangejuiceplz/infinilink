@@ -1,5 +1,5 @@
-import { fetchDailyPair, fetchRandomPair } from './api.js';
-import { initGame, addWord, getState } from './game.js';
+import { fetchDailyPair, fetchRandomPair, fetchChallengePair, getSeed, logGameResult } from './api.js';
+import { initGame, initSandbox, addWord, getState } from './game.js';
 import { initGraph, setInitialNodes, addNode, highlightWinPath, resetGraph } from './graph.js';
 import {
   updateSidebar, showFeedback, showWinModal, hideWinModal,
@@ -17,18 +17,60 @@ let lastChainStats = null;
 let isProcessing = false;
 let wordsUsed = 0;
 let wordLimit = 25;
+let optimalPath = null;
+let currentSeed = null;
+
+const ROUTES = {
+  '/': 'mode-select',
+  '/daily': 'game-screen',
+  '/infinite': 'game-screen',
+  '/timed': 'game-screen',
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   bindModeSelect();
   bindGameControls();
   bindModals();
+  handleRoute(window.location.pathname);
 });
+
+window.addEventListener('popstate', () => {
+  handleRoute(window.location.pathname);
+});
+
+function navigate(path) {
+  if (window.location.pathname === path) return;
+  history.pushState(null, '', path);
+  handleRoute(path);
+}
+
+function handleRoute(path) {
+  const challengeMatch = path.match(/^\/challenge\/([a-f0-9]+)$/i);
+  if (challengeMatch) {
+    currentMode = 'challenge';
+    currentSeed = challengeMatch[1];
+    startGame('challenge', currentSeed);
+  } else if (path === '/sandbox') {
+    currentMode = 'sandbox';
+    startSandbox();
+  } else if (path === '/daily' || path === '/infinite' || path === '/timed') {
+    const mode = path.slice(1);
+    if (currentMode !== mode || !document.getElementById('game-screen').classList.contains('active')) {
+      currentMode = mode;
+      startGame(mode);
+    }
+  } else {
+    stopTimer();
+    resetGraph();
+    showScreen('mode-select');
+  }
+}
 
 function bindModeSelect() {
   document.querySelectorAll('.mode-card').forEach(card => {
     card.addEventListener('click', () => {
-      currentMode = card.dataset.mode;
-      startGame(currentMode);
+      const mode = card.dataset.mode;
+      navigate(`/${mode}`);
     });
   });
 
@@ -84,6 +126,7 @@ function bindGameControls() {
         setInputEnabled(false);
         showFeedback('Out of words — daily challenge lost', 'error');
         recordLoss('daily');
+        sendAnalytics(false);
       } else {
         setInputEnabled(true);
         input.focus();
@@ -101,10 +144,10 @@ function bindGameControls() {
     if (e.key === 'Enter') handleAdd();
   });
 
-  document.getElementById('btn-back').addEventListener('click', () => {
+  document.getElementById('btn-home').addEventListener('click', () => {
     stopTimer();
     resetGraph();
-    showScreen('mode-select');
+    navigate('/');
   });
 
   document.getElementById('btn-stats-game').addEventListener('click', () => {
@@ -130,6 +173,24 @@ function bindModals() {
     setTimeout(() => toast.classList.remove('show'), 2000);
   });
 
+  document.getElementById('btn-share-challenge').addEventListener('click', async () => {
+    const state = getState();
+    try {
+      const data = await getSeed(state.start, state.target);
+      const url = `${window.location.origin}/challenge/${data.seed}`;
+      await copyToClipboard(`Try this infinilink challenge! ${url}`);
+      const toast = document.getElementById('share-toast');
+      toast.textContent = 'Challenge link copied!';
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.textContent = 'Copied to clipboard!';
+      }, 2000);
+    } catch (err) {
+      showFeedback('Could not generate challenge link', 'error');
+    }
+  });
+
   document.getElementById('btn-view-graph').addEventListener('click', () => {
     hideWinModal();
   });
@@ -151,12 +212,12 @@ function bindModals() {
 
   document.getElementById('btn-retry').addEventListener('click', () => {
     hideTimeUpModal();
-    startGame('timed');
+    navigate('/timed');
   });
 
   document.getElementById('btn-menu').addEventListener('click', () => {
     hideTimeUpModal();
-    showScreen('mode-select');
+    navigate('/');
   });
 
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -181,19 +242,26 @@ function updateRemaining() {
   }
 }
 
-async function startGame(mode) {
+async function startGame(mode, seed) {
   showScreen('game-screen');
   lastWinPath = null;
   lastChainStats = null;
   isProcessing = false;
   wordsUsed = 0;
+  optimalPath = null;
+  currentSeed = seed || null;
 
   let pairData;
   try {
-    if (mode === 'daily') {
+    if (mode === 'challenge' && seed) {
+      pairData = await fetchChallengePair(seed);
+      currentGameNumber = 0;
+      setHeaderMode(`Challenge`);
+    } else if (mode === 'daily') {
       pairData = await fetchDailyPair();
       currentGameNumber = pairData.game_number;
       wordLimit = pairData.word_limit || 25;
+      optimalPath = pairData.optimal_path;
       setHeaderMode(`Daily #${pairData.game_number}`);
     } else {
       pairData = await fetchRandomPair();
@@ -223,6 +291,7 @@ async function startGame(mode) {
     startCountdown(180, () => {
       setInputEnabled(false);
       recordLoss('timed');
+      sendAnalytics(false);
       showTimeUpModal();
     });
   } else {
@@ -240,6 +309,7 @@ function handleWin(path, stats) {
 
   const timeStr = formatElapsed();
   recordWin(currentMode, getElapsedSeconds(), stats.linkCount);
+  sendAnalytics(true);
 
   setTimeout(() => {
     showWinModal(path, stats, timeStr);
@@ -247,4 +317,43 @@ function handleWin(path, stats) {
 
   const nextBtn = document.getElementById('btn-next');
   nextBtn.style.display = currentMode === 'daily' ? 'none' : '';
+}
+
+function sendAnalytics(won) {
+  const state = getState();
+  logGameResult({
+    mode: currentMode,
+    start_word: state.start,
+    target_word: state.target,
+    words_used: state.words.filter(w => w !== state.start && w !== state.target),
+    connections: state.connections,
+    won,
+    time_seconds: getElapsedSeconds(),
+    game_number: currentGameNumber || null,
+    optimal_path: optimalPath,
+    word_limit: currentMode === 'daily' ? wordLimit : null,
+  }).catch(() => {});
+}
+
+function startSandbox() {
+  showScreen('game-screen');
+  lastWinPath = null;
+  lastChainStats = null;
+  isProcessing = false;
+  wordsUsed = 0;
+  currentGameNumber = 0;
+  setHeaderMode('Sandbox');
+
+  initGraph('graph-container');
+
+  initSandbox({
+    onUpdate: (state) => updateSidebar(state),
+  });
+
+  updateSidebar(getState());
+  updateRemaining();
+  setInputEnabled(true);
+  document.getElementById('word-input').value = '';
+  document.getElementById('word-input').focus();
+  startStopwatch();
 }

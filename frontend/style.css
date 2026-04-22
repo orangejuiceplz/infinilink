@@ -49,11 +49,24 @@ button svg, .stats-link svg {
 /* === Screens === */
 .screen {
   display: none;
+  flex-direction: column;
   height: 100%;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
+
 .screen.active {
   display: flex;
-  flex-direction: column;
+  opacity: 1;
+}
+
+.screen.fade-in {
+  animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* === Mode Select === */
@@ -178,6 +191,19 @@ button svg, .stats-link svg {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+  font-family: inherit;
+}
+
+.header-title:hover {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .header-mode {

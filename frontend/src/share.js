@@ -3,7 +3,7 @@ export function generateShareText(mode, gameNumber, chain, avgSimilarity, timeSt
   const chainStr = chain.join(' → ');
   const links = chain.length - 1;
 
-  let text = `unlinxicon ${modeLabel} 🔗\n`;
+  let text = `infinilink ${modeLabel} 🔗\n`;
   text += `${chainStr}\n`;
   text += `${links} link${links !== 1 ? 's' : ''} · avg ${avgSimilarity}%`;
   if (timeStr) text += ` · ⏱ ${timeStr}`;

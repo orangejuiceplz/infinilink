@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
 import pathlib
+import json
 
-from embeddings import get_similarity, get_batch_similarity, CONNECTION_THRESHOLD, find_shortest_path
+from embeddings import get_similarity, get_batch_similarity, CONNECTION_THRESHOLD, find_shortest_path, word_has_embedding
 from words import get_daily_pair, get_random_pair, WORD_LIST
 
-app = FastAPI(title="unlinxicon API")
+app = FastAPI(title="infinilink API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,6 +26,22 @@ class SimilarityRequest(BaseModel):
 class BatchSimilarityRequest(BaseModel):
     new_word: str
     existing_words: list[str]
+
+
+class GameResult(BaseModel):
+    mode: str
+    start_word: str
+    target_word: str
+    words_used: list[str]
+    connections: list[dict]
+    won: bool
+    time_seconds: float
+    game_number: int | None = None
+    optimal_path: int | None = None
+    word_limit: int | None = None
+
+
+ANALYTICS_FILE = pathlib.Path(__file__).parent / "analytics.jsonl"
 
 
 @app.get("/api/health")
@@ -59,6 +76,42 @@ def daily_pair(date_str: str | None = None):
 def random_pair():
     start, target = get_random_pair()
     return {"start": start, "target": target}
+
+
+def _encode_seed(word_a: str, word_b: str) -> str:
+    idx_a = WORD_LIST.index(word_a) if word_a in WORD_LIST else 0
+    idx_b = WORD_LIST.index(word_b) if word_b in WORD_LIST else 0
+    return f"{idx_a:04x}{idx_b:04x}"
+
+
+def _decode_seed(seed: str) -> tuple[str, str] | None:
+    try:
+        idx_a = int(seed[:4], 16)
+        idx_b = int(seed[4:8], 16)
+        if idx_a >= len(WORD_LIST) or idx_b >= len(WORD_LIST):
+            return None
+        return WORD_LIST[idx_a], WORD_LIST[idx_b]
+    except (ValueError, IndexError):
+        return None
+
+
+@app.get("/api/challenge/{seed}")
+def challenge_pair(seed: str):
+    pair = _decode_seed(seed)
+    if pair is None:
+        raise HTTPException(400, "Invalid challenge seed")
+    start, target = pair
+    return {"start": start, "target": target, "seed": seed}
+
+
+@app.get("/api/seed/{word_a}/{word_b}")
+def get_seed(word_a: str, word_b: str):
+    word_a = word_a.lower().strip()
+    word_b = word_b.lower().strip()
+    if word_a not in WORD_LIST or word_b not in WORD_LIST:
+        raise HTTPException(400, "Words must be from the word list")
+    seed = _encode_seed(word_a, word_b)
+    return {"seed": seed, "start": word_a, "target": word_b}
 
 
 @app.post("/api/similarity")
@@ -113,7 +166,6 @@ def _load_dictionary() -> set[str]:
                 break
 
     if not _dictionary:
-        from words import WORD_LIST
         _dictionary = set(WORD_LIST)
 
     print(f"Dictionary loaded: {len(_dictionary)} words")
@@ -132,12 +184,66 @@ def validate_word(word: str):
     if word not in dictionary:
         return {"valid": False, "word": word, "reason": "Not a recognized word"}
 
+    if not word_has_embedding(word):
+        return {"valid": False, "word": word, "reason": "Word not in vocabulary"}
+
     return {"valid": True, "word": word}
+
+
+@app.post("/api/analytics")
+def log_game_result(result: GameResult):
+    entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "mode": result.mode,
+        "start": result.start_word,
+        "target": result.target_word,
+        "words_used": result.words_used,
+        "connections_count": len(result.connections),
+        "won": result.won,
+        "time_seconds": round(result.time_seconds, 1),
+        "game_number": result.game_number,
+        "optimal_path": result.optimal_path,
+        "word_limit": result.word_limit,
+    }
+    try:
+        with open(ANALYTICS_FILE, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception:
+        pass
+    return {"logged": True}
+
+
+@app.get("/api/analytics/summary")
+def analytics_summary():
+    if not ANALYTICS_FILE.exists():
+        return {"total_games": 0, "games": []}
+
+    games = []
+    for line in ANALYTICS_FILE.read_text().splitlines():
+        if line.strip():
+            try:
+                games.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+
+    wins = [g for g in games if g.get("won")]
+    return {
+        "total_games": len(games),
+        "total_wins": len(wins),
+        "win_rate": round(len(wins) / len(games) * 100, 1) if games else 0,
+        "by_mode": {
+            mode: {
+                "played": len([g for g in games if g["mode"] == mode]),
+                "won": len([g for g in games if g["mode"] == mode and g.get("won")]),
+            }
+            for mode in ["daily", "infinite", "timed"]
+        },
+        "recent": games[-20:],
+    }
 
 
 static_dir = pathlib.Path(__file__).parent / "static"
 if static_dir.exists():
-    from fastapi.staticfiles import StaticFiles
     from fastapi.responses import FileResponse
 
     @app.get("/{path:path}")

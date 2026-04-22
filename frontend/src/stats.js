@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'unlinxicon_stats';
+const STORAGE_KEY = 'infinilink_stats';
 
 const DEFAULT_MODE_STATS = {
   played: 0,

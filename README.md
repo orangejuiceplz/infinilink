@@ -1,5 +1,5 @@
 ---
-title: unlinxicon
+title: infinilink
 emoji: 🔗
 colorFrom: gray
 colorTo: green
@@ -10,7 +10,7 @@ license: mit
 short_description: Semantic word chain puzzle game
 ---
 
-# unlinxicon
+# infinilink
 
 Connect two words by building a chain of semantically related words.
 
@@ -19,4 +19,4 @@ Connect two words by building a chain of semantically related words.
 - **Infinite** — Random pairs, play as many as you want
 - **Timed** — Beat the 3-minute clock
 
-Built with FastAPI + Sentence-BERT (all-MiniLM-L6-v2) + D3.js force graph.
+Built with FastAPI + GloVe word vectors + D3.js force graph.

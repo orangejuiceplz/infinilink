@@ -29,3 +29,18 @@ export async function fetchBatchSimilarity(newWord, existingWords) {
 export async function validateWord(word) {
   return request(`/api/validate/${encodeURIComponent(word)}`);
 }
+
+export async function logGameResult(data) {
+  return request('/api/analytics', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchChallengePair(seed) {
+  return request(`/api/challenge/${encodeURIComponent(seed)}`);
+}
+
+export async function getSeed(wordA, wordB) {
+  return request(`/api/seed/${encodeURIComponent(wordA)}/${encodeURIComponent(wordB)}`);
+}

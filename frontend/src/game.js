@@ -27,6 +27,20 @@ export function initGame(start, target, mode, gameNumber, callbacks) {
   if (state.onUpdate) state.onUpdate(state);
 }
 
+export function initSandbox(callbacks) {
+  state = {
+    start: '',
+    target: '',
+    mode: 'sandbox',
+    gameNumber: 0,
+    words: [],
+    connections: [],
+    onUpdate: callbacks.onUpdate || null,
+    onWin: null,
+  };
+  if (state.onUpdate) state.onUpdate(state);
+}
+
 export function getState() {
   return { ...state };
 }
@@ -59,6 +73,10 @@ export async function addWord(word) {
   }
 
   if (state.onUpdate) state.onUpdate(state);
+
+  if (state.mode === 'sandbox') {
+    return { success: true, connections: newConnections, win: false };
+  }
 
   const winPath = checkWin();
   if (winPath) {
@@ -136,6 +154,13 @@ function getChainStats(path) {
 }
 
 export function getSmallestGap() {
+  if (state.mode === 'sandbox' || !state.start || !state.target) {
+    const totalConns = state.connections.length;
+    if (totalConns === 0) return { words: '—', similarity: 0 };
+    const best = state.connections.reduce((max, c) => c.similarity > max.similarity ? c : max, state.connections[0]);
+    return { words: `${best.source} — ${best.target}`, similarity: best.similarity, connected: true };
+  }
+
   const startReachable = getReachableFrom(state.start);
   const targetReachable = getReachableFrom(state.target);
 

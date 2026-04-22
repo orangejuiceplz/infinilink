@@ -7,6 +7,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
 
+# Pre-download GloVe vectors during build
+RUN python -c "import gensim.downloader as api; api.load('glove-wiki-gigaword-100')" \
+    && echo "GloVe model cached"
+
 FROM node:20-slim AS frontend
 
 WORKDIR /app
@@ -21,11 +25,9 @@ WORKDIR /app
 
 COPY --from=backend /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+COPY --from=backend /root/gensim-data /root/gensim-data
 COPY backend/ .
 COPY --from=frontend /app/dist ./static
-
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')" \
-    && echo "Model cached"
 
 EXPOSE 7860
 
