@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>unlinxicon — word chain puzzle</title>
+  <meta name="description" content="Connect two words by building a chain of semantically related words. Daily challenges, infinite mode, and timed play." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Mode Select Screen -->
+    <div id="mode-select" class="screen active">
+      <header class="mode-header">
+        <h1 class="logo">unlinxicon</h1>
+        <p class="tagline">connect words via their meaning</p>
+      </header>
+      <div class="mode-cards">
+        <button class="mode-card" data-mode="daily" id="btn-daily">
+          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+          <div class="mode-title">Daily</div>
+          <div class="mode-desc">Same puzzle for everyone. One shot per day.</div>
+        </button>
+        <button class="mode-card" data-mode="infinite" id="btn-infinite">
+          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg></div>
+          <div class="mode-title">Infinite</div>
+          <div class="mode-desc">Random pairs. Play as many as you want.</div>
+        </button>
+        <button class="mode-card" data-mode="timed" id="btn-timed">
+          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="13"/><line x1="9" y1="1" x2="15" y2="1"/><line x1="12" y1="1" x2="12" y2="5"/></svg></div>
+          <div class="mode-title">Timed</div>
+          <div class="mode-desc">Random pair. Beat the 3-minute clock.</div>
+        </button>
+      </div>
+      <button class="stats-link" id="btn-stats-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="4" height="7"/><rect x="10" y="9" width="4" height="12"/><rect x="16" y="4" width="4" height="17"/></svg> Stats</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <header class="game-header">
+        <button class="header-btn" id="btn-back" title="Back to menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+        <div class="header-center">
+          <span class="header-title">unlinxicon</span>
+          <span class="header-mode" id="header-mode"></span>
+        </div>
+        <div class="header-right">
+          <span class="timer" id="timer">0:00</span>
+          <button class="header-btn" id="btn-stats-game" title="Stats"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="4" height="7"/><rect x="10" y="9" width="4" height="12"/><rect x="16" y="4" width="4" height="17"/></svg></button>
+        </div>
+      </header>
+
+      <div class="game-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-section">
+            <div class="input-group">
+              <input 
+                type="text" 
+                id="word-input" 
+                class="word-input" 
+                placeholder="Type a word..." 
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+              />
+              <button class="btn-add" id="btn-add">Add</button>
+            </div>
+            <div class="input-feedback" id="input-feedback"></div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="stat-row">
+              <span class="stat-label">Words</span>
+              <span class="stat-value" id="word-count">2</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Links</span>
+              <span class="stat-value" id="link-count">0</span>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="gap-label">Smallest gap</div>
+            <div class="gap-display" id="gap-display">
+              <span class="gap-words" id="gap-words">— &mdash; —</span>
+              <span class="gap-pct" id="gap-pct">0%</span>
+            </div>
+          </div>
+
+          <div class="sidebar-section links-section">
+            <div class="links-header">Links</div>
+            <div class="links-list" id="links-list"></div>
+          </div>
+        </aside>
+
+        <!-- Graph Canvas -->
+        <main class="graph-container" id="graph-container">
+          <svg id="graph-svg"></svg>
+        </main>
+      </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal-overlay" id="win-modal">
+      <div class="modal">
+        <h2 class="modal-title">Connected!</h2>
+        <div class="win-chain" id="win-chain"></div>
+        <div class="win-stats">
+          <div class="win-stat">
+            <span class="win-stat-value" id="win-links">0</span>
+            <span class="win-stat-label">Links</span>
+          </div>
+          <div class="win-stat">
+            <span class="win-stat-value" id="win-avg">0%</span>
+            <span class="win-stat-label">Avg. Similarity</span>
+          </div>
+          <div class="win-stat">
+            <span class="win-stat-value" id="win-time">0:00</span>
+            <span class="win-stat-label">Time</span>
+          </div>
+          <div class="win-stat">
+            <span class="win-stat-value" id="win-words">0</span>
+            <span class="win-stat-label">Words Used</span>
+          </div>
+        </div>
+        <div class="win-actions">
+          <button class="btn-primary" id="btn-share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Share</button>
+          <button class="btn-primary" id="btn-next">Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+        </div>
+        <div class="share-toast" id="share-toast">Copied to clipboard!</div>
+      </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div class="modal-overlay" id="stats-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Statistics</h2>
+          <button class="modal-close" id="btn-stats-close">×</button>
+        </div>
+        <div class="stats-tabs">
+          <button class="stats-tab active" data-tab="daily">Daily</button>
+          <button class="stats-tab" data-tab="infinite">Infinite</button>
+          <button class="stats-tab" data-tab="timed">Timed</button>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+    </div>
+
+    <!-- Time's Up Modal -->
+    <div class="modal-overlay" id="timeup-modal">
+      <div class="modal">
+        <h2 class="modal-title">Time's Up!</h2>
+        <p class="modal-text">You ran out of time. Try again?</p>
+        <div class="win-actions">
+          <button class="btn-primary" id="btn-retry"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Try Again</button>
+          <button class="btn-secondary" id="btn-menu">Menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
