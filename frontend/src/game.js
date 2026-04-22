@@ -36,10 +36,11 @@ export async function addWord(word) {
 
   if (!word) return { error: 'Enter a word' };
   if (!word.match(/^[a-z]+$/)) return { error: 'Letters only' };
+  if (word.length < 3) return { error: 'Minimum 3 letters' };
   if (state.words.includes(word)) return { error: 'Already on the board' };
 
   const validation = await validateWord(word);
-  if (!validation.valid) return { error: 'Invalid word' };
+  if (!validation.valid) return { error: validation.reason || 'Not a valid word' };
 
   const batchResult = await fetchBatchSimilarity(word, state.words);
   state.words.push(word);

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date
+import pathlib
 
 from embeddings import get_similarity, get_batch_similarity, CONNECTION_THRESHOLD
 from words import get_daily_pair, get_random_pair
@@ -76,9 +77,45 @@ def batch_similarity(req: BatchSimilarityRequest):
     return {"word": new_word, "results": results}
 
 
+_dictionary: set[str] | None = None
+
+def _load_dictionary() -> set[str]:
+    global _dictionary
+    if _dictionary is not None:
+        return _dictionary
+
+    _dictionary = set()
+
+    dict_paths = [
+        pathlib.Path("/usr/share/dict/words"),
+        pathlib.Path("/usr/share/dict/american-english"),
+    ]
+    for p in dict_paths:
+        if p.exists():
+            _dictionary = {
+                w.strip().lower()
+                for w in p.read_text().splitlines()
+                if w.strip().isalpha() and len(w.strip()) >= 3
+            }
+            break
+
+    if not _dictionary:
+        from words import WORD_LIST
+        _dictionary = set(WORD_LIST)
+
+    return _dictionary
+
+
 @app.get("/api/validate/{word}")
 def validate_word(word: str):
     word = word.lower().strip()
     if not word or not word.isalpha():
-        return {"valid": False, "word": word}
+        return {"valid": False, "word": word, "reason": "Letters only"}
+    if len(word) < 3:
+        return {"valid": False, "word": word, "reason": "Minimum 3 letters"}
+
+    dictionary = _load_dictionary()
+    if word not in dictionary:
+        return {"valid": False, "word": word, "reason": "Not a recognized word"}
+
     return {"valid": True, "word": word}
