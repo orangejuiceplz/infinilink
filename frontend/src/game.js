@@ -61,6 +61,14 @@ export async function addWord(word) {
 
   let newConnections = [];
   for (const r of batchResult.results) {
+    if (!state.allScores) state.allScores = [];
+    state.allScores.push({
+      source: word,
+      target: r.word,
+      similarity: r.similarity,
+      connected: r.connected,
+    });
+
     if (r.connected) {
       const conn = {
         source: word,

@@ -327,6 +327,7 @@ function sendAnalytics(won) {
     target_word: state.target,
     words_used: state.words.filter(w => w !== state.start && w !== state.target),
     connections: state.connections,
+    all_scores: state.allScores || [],
     won,
     time_seconds: getElapsedSeconds(),
     game_number: currentGameNumber || null,

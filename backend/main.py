@@ -34,6 +34,7 @@ class GameResult(BaseModel):
     target_word: str
     words_used: list[str]
     connections: list[dict]
+    all_scores: list[dict] = []
     won: bool
     time_seconds: float
     game_number: int | None = None
@@ -198,7 +199,9 @@ def log_game_result(result: GameResult):
         "start": result.start_word,
         "target": result.target_word,
         "words_used": result.words_used,
+        "connections": result.connections,
         "connections_count": len(result.connections),
+        "all_scores": result.all_scores,
         "won": result.won,
         "time_seconds": round(result.time_seconds, 1),
         "game_number": result.game_number,
@@ -227,6 +230,15 @@ def analytics_summary():
                 pass
 
     wins = [g for g in games if g.get("won")]
+
+    all_scores = []
+    for g in games:
+        for s in g.get("all_scores", []):
+            all_scores.append(s)
+    not_connected = [s for s in all_scores if not s.get("connected")]
+    not_connected.sort(key=lambda x: -x.get("similarity", 0))
+    top_near_misses = not_connected[:30]
+
     return {
         "total_games": len(games),
         "total_wins": len(wins),
@@ -236,8 +248,9 @@ def analytics_summary():
                 "played": len([g for g in games if g["mode"] == mode]),
                 "won": len([g for g in games if g["mode"] == mode and g.get("won")]),
             }
-            for mode in ["daily", "infinite", "timed"]
+            for mode in ["daily", "infinite", "timed", "sandbox", "challenge"]
         },
+        "top_near_misses": top_near_misses,
         "recent": games[-20:],
     }
 
