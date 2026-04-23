@@ -14,33 +14,40 @@
   <div id="app">
     <!-- Mode Select Screen -->
     <div id="mode-select" class="screen active">
+      <div class="mode-top-bar">
+        <div></div>
+        <button class="stats-link" id="btn-stats-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="4" height="7"/><rect x="10" y="9" width="4" height="12"/><rect x="16" y="4" width="4" height="17"/></svg> Stats</button>
+      </div>
       <header class="mode-header">
         <h1 class="logo">infinilink</h1>
         <p class="tagline">connect words via their meaning</p>
       </header>
       <div class="mode-cards">
         <button class="mode-card" data-mode="daily" id="btn-daily">
-          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+          <div class="mode-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
           <div class="mode-title">Daily</div>
           <div class="mode-desc">Same puzzle for everyone. One shot per day.</div>
         </button>
         <button class="mode-card" data-mode="infinite" id="btn-infinite">
-          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg></div>
+          <div class="mode-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg></div>
           <div class="mode-title">Infinite</div>
           <div class="mode-desc">Random pairs. Play as many as you want.</div>
         </button>
         <button class="mode-card" data-mode="timed" id="btn-timed">
-          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="13"/><line x1="9" y1="1" x2="15" y2="1"/><line x1="12" y1="1" x2="12" y2="5"/></svg></div>
+          <div class="mode-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="13"/><line x1="9" y1="1" x2="15" y2="1"/><line x1="12" y1="1" x2="12" y2="5"/></svg></div>
           <div class="mode-title">Timed</div>
           <div class="mode-desc">Random pair. Beat the 3-minute clock.</div>
         </button>
         <button class="mode-card" data-mode="sandbox" id="btn-sandbox">
-          <div class="mode-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+          <div class="mode-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
           <div class="mode-title">Sandbox</div>
           <div class="mode-desc">No goal. Build the biggest web of connections.</div>
         </button>
       </div>
-      <button class="stats-link" id="btn-stats-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="4" height="7"/><rect x="10" y="9" width="4" height="12"/><rect x="16" y="4" width="4" height="17"/></svg> Stats</button>
+      <footer class="mode-footer">
+        <span class="footer-credit">made by <strong>λamdashi</strong></span>
+        <span class="footer-version" id="commit-hash"></span>
+      </footer>
     </div>
 
     <!-- Game Screen -->

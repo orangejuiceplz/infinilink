@@ -73,8 +73,22 @@ button svg, .stats-link svg {
 #mode-select {
   align-items: center;
   justify-content: center;
-  gap: 40px;
-  padding: 40px 20px;
+  gap: 36px;
+  padding: 20px 24px 24px;
+  position: relative;
+}
+
+.mode-top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  max-width: 780px;
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  left: 24px;
+  margin: 0 auto;
 }
 
 .mode-header {
@@ -82,22 +96,22 @@ button svg, .stats-link svg {
 }
 
 .logo {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: -1.5px;
   color: var(--text);
 }
 
 .tagline {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-dim);
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .mode-cards {
   display: flex;
   gap: 16px;
-  max-width: 700px;
+  max-width: 780px;
   width: 100%;
 }
 
@@ -105,8 +119,8 @@ button svg, .stats-link svg {
   flex: 1;
   background: var(--surface);
   border: 2px solid var(--border);
-  border-radius: 8px;
-  padding: 28px 20px;
+  border-radius: 10px;
+  padding: 32px 20px;
   cursor: pointer;
   text-align: center;
   color: var(--text);
@@ -124,20 +138,41 @@ button svg, .stats-link svg {
 }
 
 .mode-icon {
-  font-size: 32px;
-  margin-bottom: 12px;
+  font-size: 36px;
+  margin-bottom: 14px;
 }
 
 .mode-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
 .mode-desc {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-dim);
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.mode-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.footer-credit strong {
+  color: var(--text);
+}
+
+.footer-version {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  opacity: 0.5;
 }
 
 .stats-link {
@@ -150,6 +185,9 @@ button svg, .stats-link svg {
   padding: 8px 16px;
   border-radius: 6px;
   transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .stats-link:hover {
   color: var(--text);

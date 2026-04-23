@@ -28,6 +28,9 @@ const ROUTES = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  const hashEl = document.getElementById('commit-hash');
+  if (hashEl) hashEl.textContent = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'dev';
+
   bindModeSelect();
   bindGameControls();
   bindModals();
