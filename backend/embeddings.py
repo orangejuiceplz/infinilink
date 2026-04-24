@@ -1,7 +1,7 @@
 import numpy as np
 from collections import deque
 
-CONNECTION_THRESHOLD = 0.50
+CONNECTION_THRESHOLD = 0.35
 
 _model = None
 _cache: dict[str, np.ndarray] = {}
