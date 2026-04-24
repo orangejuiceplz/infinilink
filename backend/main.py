@@ -255,6 +255,13 @@ def analytics_summary():
     }
 
 
+@app.delete("/api/analytics")
+def clear_analytics():
+    if ANALYTICS_FILE.exists():
+        ANALYTICS_FILE.unlink()
+    return {"cleared": True}
+
+
 static_dir = pathlib.Path(__file__).parent / "static"
 if static_dir.exists():
     from fastapi.responses import FileResponse

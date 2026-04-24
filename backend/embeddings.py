@@ -12,8 +12,8 @@ def _get_model():
     if _model is None:
         import gensim.downloader as api
         print("Loading GloVe word vectors...")
-        _model = api.load("glove-wiki-gigaword-100")
-        print(f"GloVe loaded: {len(_model.key_to_index)} words, 100 dimensions")
+        _model = api.load("glove-wiki-gigaword-300")
+        print(f"GloVe loaded: {len(_model.key_to_index)} words, 300 dimensions")
     return _model
 
 
