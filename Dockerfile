@@ -8,8 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Pre-download GloVe vectors during build
-RUN python -c "import gensim.downloader as api; api.load('glove-wiki-gigaword-300')" \
-    && echo "GloVe model cached"
+RUN python -c "import gensim.downloader as api; api.load('word2vec-google-news-300')" \
+    && echo "Word2Vec model cached"
 
 FROM node:20-slim AS frontend
 
